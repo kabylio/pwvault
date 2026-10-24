@@ -88,3 +88,15 @@ def test_ui_never_uses_innerhtml_or_eval():
         code = (static / name).read_text()
         for banned in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write", "eval(", "new Function"):
             assert banned not in code, f"{name} uses {banned}"
+
+
+def test_auth_actions_match_the_selected_signup_mode():
+    static = ROOT / "pwvault_server" / "static"
+    html = (static / "index.html").read_text(encoding="utf-8")
+    js = (static / "app.js").read_text(encoding="utf-8")
+    login_actions = html.split('<div id="loginActions">', 1)[1].split("</div>", 1)[0]
+    assert 'id="recoverAccount"' in login_actions
+    assert "$('#loginActions').hidden = m !== 'login'" in js
+    assert 'id="inviteHelp"' in html
+    assert "$('#inviteRow').hidden = m !== 'register' || !invitationRequired" in js
+    assert "fetch('/auth/registration-policy'" in js

@@ -30,6 +30,11 @@ def test_open_mode_is_unchanged(http):
     reg(http, "anyone@bank.dz")                              # default settings stay open
 
 
+def test_registration_policy_is_public_and_matches_server_mode(http, invite_http):
+    assert http.get("/auth/registration-policy").json() == {"invite_required": False}
+    assert invite_http.get("/auth/registration-policy").json() == {"invite_required": True}
+
+
 def test_registration_needs_an_invitation(invite_http, boss):
     for code in (None, "", "not-a-real-code"):
         with pytest.raises(RemoteError) as e:

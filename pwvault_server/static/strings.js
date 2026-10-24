@@ -2,6 +2,13 @@
 // banking-terminology reviewer: please have a French and an Arabic speaker check them.
 export default {
   fr: {
+    'Choose a strong master password. If you forget it, you can only restore vault access with a recovery key set up in advance.': "Choisissez un mot de passe principal robuste. En cas d'oubli, l'accès au coffre ne peut être rétabli qu'avec une clé de récupération configurée à l'avance.",
+    'Enter the single-use code sent by your administrator for this email. Configured administrator accounts may leave it blank.': "Saisissez le code à usage unique fourni par votre administrateur pour cette adresse e-mail. Les comptes administrateur configurés peuvent laisser ce champ vide.",
+    'I understand I must set up a recovery key in advance to recover vault access.': "Je comprends que je dois configurer une clé de récupération à l'avance pour retrouver l'accès au coffre.",
+    'This works only if you set up and saved a recovery key before losing access.': "Cela fonctionne uniquement si vous avez configuré et sauvegardé une clé de récupération avant de perdre l'accès.",
+    'Please confirm that a recovery key must be set up in advance to recover vault access.': "Veuillez confirmer qu'une clé de récupération doit être configurée à l'avance pour retrouver l'accès au coffre.",
+    'Could not load registration requirements. Refresh the page and try again.': "Impossible de charger les conditions d'inscription. Actualisez la page et réessayez.",
+    'Loading registration requirements...': "Chargement des conditions d'inscription...",
     'Sign in': 'Se connecter', 'Create account': 'Créer un compte', 'Email': 'E-mail',
     'Master password': 'Mot de passe principal', 'Show password': 'Afficher le mot de passe',
     'Confirm master password': 'Confirmer le mot de passe principal',
@@ -100,6 +107,13 @@ export default {
     "The backup passphrases do not match.": "Les phrases secretes de sauvegarde ne correspondent pas.",
   },
   ar: {
+    'Choose a strong master password. If you forget it, you can only restore vault access with a recovery key set up in advance.': 'اختر كلمة مرور رئيسية قوية. إذا نسيتها، فلا يمكن استعادة الوصول إلى الخزنة إلا بمفتاح استعادة أُعد مسبقاً.',
+    'Enter the single-use code sent by your administrator for this email. Configured administrator accounts may leave it blank.': 'أدخل الرمز لمرة واحدة الذي أرسله المسؤول إلى هذا البريد الإلكتروني. يمكن لحسابات المسؤولين المهيأة تركه فارغاً.',
+    'I understand I must set up a recovery key in advance to recover vault access.': 'أفهم أنه يجب إعداد مفتاح استعادة مسبقاً لاستعادة الوصول إلى الخزنة.',
+    'This works only if you set up and saved a recovery key before losing access.': 'يعمل هذا فقط إذا أعددت مفتاح استعادة وحفظته قبل فقدان الوصول.',
+    'Please confirm that a recovery key must be set up in advance to recover vault access.': 'يرجى تأكيد ضرورة إعداد مفتاح استعادة مسبقاً لاستعادة الوصول إلى الخزنة.',
+    'Could not load registration requirements. Refresh the page and try again.': 'تعذر تحميل متطلبات التسجيل. حدّث الصفحة وحاول مرة أخرى.',
+    'Loading registration requirements...': 'جارٍ تحميل متطلبات التسجيل...',
     'Sign in': 'تسجيل الدخول', 'Create account': 'إنشاء حساب', 'Email': 'البريد الإلكتروني',
     'Master password': 'كلمة المرور الرئيسية', 'Show password': 'إظهار كلمة المرور',
     'Confirm master password': 'تأكيد كلمة المرور الرئيسية',

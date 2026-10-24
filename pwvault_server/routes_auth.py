@@ -24,6 +24,12 @@ INVALID = "Invalid credentials"
 DEFAULT_KDF = Kdf(time_cost=3, memory_cost_kib=65536, parallelism=4)
 
 
+@router.get("/registration-policy")
+def registration_policy(s: Settings = Depends(get_settings)):
+    """Expose only the public signup mode needed to render the registration form."""
+    return {"invite_required": s.registration == "invite"}
+
+
 def _check_kdf(kdf: Kdf, s: Settings) -> None:
     if (kdf.time_cost < s.min_time_cost or kdf.memory_cost_kib < s.min_memory_kib
             or kdf.parallelism < s.min_parallelism):

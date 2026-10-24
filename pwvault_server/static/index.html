@@ -18,14 +18,15 @@
     <label>Master password <input id="master" type="password" required autocomplete="current-password"></label>
     <label class="check"><input type="checkbox" id="showPw"> Show password</label>
     <div id="meter" data-score="0" hidden><i></i><small></small></div>
-    <p id="regHint" class="hint" hidden>Tip: pick 4 or more random words, or 12+ characters. You will type it often, and nobody can reset it.</p>
+    <p id="regHint" class="hint" hidden>Choose a strong master password. If you forget it, you can only restore vault access with a recovery key set up in advance.</p>
     <label id="confirmRow" hidden>Confirm master password <input id="confirm" type="password" autocomplete="new-password"></label>
-    <label id="inviteRow" hidden>Invitation code (from your administrator) <input id="invite" autocomplete="off"></label>
-    <label id="ackRow" class="check" hidden><input type="checkbox" id="ack"> I understand my master password cannot be recovered</label>
+    <label id="inviteRow" hidden>Invitation code (from your administrator) <input id="invite" autocomplete="off"><small id="inviteHelp" class="hint">Enter the single-use code sent by your administrator for this email. Configured administrator accounts may leave it blank.</small></label>
+    <label id="ackRow" class="check" hidden><input type="checkbox" id="ack"> I understand I must set up a recovery key in advance to recover vault access.</label>
     <div id="otpRow" hidden><label>Authenticator code or recovery code <input id="otp" inputmode="text" autocomplete="one-time-code"></label><button id="usePasskey" type="button" class="ghost" hidden>Use a passkey</button></div>
     <p id="err" class="err" role="alert"></p>
     <button id="go" class="primary">Sign in</button>
-    <button id="recoverAccount" type="button" class="ghost">Recover account with recovery key</button><p class="hint">Your master password never leaves this device and cannot be recovered.</p>
+    <div id="loginActions"><button id="recoverAccount" type="button" class="ghost">Recover account with recovery key</button><p class="hint">This works only if you set up and saved a recovery key before losing access.</p></div>
+    <p class="hint">Your master password never leaves this device and cannot be recovered.</p>
   </form>
 </main>
 

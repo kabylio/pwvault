@@ -5,6 +5,7 @@ const argon = (o) => window.hashwasm.argon2id(o);
 const KDF = { time_cost: 3, memory_cost_kib: 65536, parallelism: 4 };
 const IDLE_MS = 5 * 60 * 1000, CLIP_MS = 20 * 1000;
 let S = null, pending = null, mode = 'login', entries = [], editing = null, idle = null, ctx = null, vaults = [], pendingImport = [], activeAttachments = [], customRows = [];
+let registrationPolicyLoaded = false, registrationPolicyFailed = false, invitationRequired = false;
 
 const toast = (m) => { const t = $('#toast'); t.textContent = m; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 2500); };
 const show = (unlocked) => { $('#auth').hidden = unlocked; $('#vault').hidden = !unlocked; $('#tools').hidden = !unlocked; $('#who').textContent = unlocked ? S.email : ''; };
@@ -48,23 +49,49 @@ $('#btnLock').onclick = () => lock('Locked.');
 
 // ---- auth ----
 function setMode(m) {
+  if (mode === 'register' && m !== 'register') {
+    $('#invite').value = ''; $('#confirm').value = ''; $('#ack').checked = false;
+  }
   mode = m; pending = null;
   document.querySelectorAll('.tabs button').forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
-  ['#confirmRow', '#meter', '#regHint', '#inviteRow', '#ackRow'].forEach((s) => ($(s).hidden = m !== 'register')); $('#otpRow').hidden = true; $('#usePasskey').hidden = true;
+  ['#confirmRow', '#meter', '#regHint', '#ackRow'].forEach((s) => ($(s).hidden = m !== 'register'));
+  $('#inviteRow').hidden = m !== 'register' || !invitationRequired;
+  $('#loginActions').hidden = m !== 'login';
+  $('#go').disabled = m === 'register' && (!registrationPolicyLoaded || registrationPolicyFailed);
   $('#master').autocomplete = m === 'login' ? 'current-password' : 'new-password';
-  $('#go').textContent = m === 'login' ? 'Sign in' : 'Create account'; $('#err').textContent = '';
+  $('#go').textContent = m === 'login' ? 'Sign in' : 'Create account';
+  $('#err').textContent = m === 'register'
+    ? registrationPolicyFailed ? 'Could not load registration requirements. Refresh the page and try again.'
+      : !registrationPolicyLoaded ? 'Loading registration requirements...' : ''
+    : '';
 }
+setMode('login');
 document.querySelectorAll('.tabs button').forEach((b) => (b.onclick = () => setMode(b.dataset.mode)));
+fetch('/auth/registration-policy', { cache: 'no-store' }).then((r) => {
+  if (!r.ok) throw new Error('Could not load registration policy');
+  return r.json();
+}).then((policy) => {
+  invitationRequired = policy.invite_required === true;
+}).catch(() => {
+  registrationPolicyFailed = true;
+}).finally(() => {
+  registrationPolicyLoaded = true;
+  setMode(mode);
+});
 $('#master').oninput = () => mode === 'register' && meter($('#meter'), $('#master').value);
 
 $('#authForm').onsubmit = async (ev) => {
   ev.preventDefault(); const go = $('#go'), err = $('#err'); err.textContent = ''; go.disabled = true;
+  if (mode === 'register' && (!registrationPolicyLoaded || registrationPolicyFailed)) {
+    err.textContent = 'Could not load registration requirements. Refresh the page and try again.';
+    go.disabled = true; return;
+  }
   const email = $('#email').value.trim().toLowerCase(), pw = $('#master').value;
   try {
     if (mode === 'register') {
       if (pw.length < 12) throw new Error('Master password must be at least 12 characters.');
       if (pw !== $('#confirm').value) throw new Error('Passwords do not match.');
-      if (!$('#ack').checked) throw new Error('Please tick the box to confirm you understand the master password cannot be recovered.');
+      if (!$('#ack').checked) throw new Error('Please confirm that a recovery key must be set up in advance to recover vault access.');
       go.textContent = 'Deriving keys…';
       const salt = C.rand(16), { encKey, authKey } = await C.deriveKeys(argon, pw, salt, KDF);
       const wrapped = C.b64e(await C.encrypt(encKey, C.rand(32), C.WRAP_AAD));
