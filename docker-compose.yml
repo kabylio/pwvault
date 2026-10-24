@@ -1,0 +1,34 @@
+# One-command deployment:  docker compose up -d --build
+# 1. python scripts/gen_secrets.py > .env      (then add PWVAULT_ADMIN_EMAILS=... to .env)
+# 2. docker compose up -d --build
+# 3. open https://localhost  (Caddy's local CA: accept the certificate once)
+services:
+  app:
+    build: .
+    env_file: .env
+    restart: unless-stopped
+    volumes:
+      - vault-data:/data
+    # NOTE: no "ports:" on purpose. Only the proxy below can reach the app,
+    # which is what makes trusting X-Forwarded-For safe.
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    tmpfs: [/tmp]
+
+  proxy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  vault-data:
+  caddy-data:

@@ -1,0 +1,8 @@
+# Terminates TLS and forwards to the app. For a real deployment replace
+# "localhost" with the bank's hostname (Caddy then gets a trusted certificate),
+# or swap in the bank's own reverse proxy / WAF with its internal certificates.
+localhost {
+	encode gzip
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	reverse_proxy app:8000
+}

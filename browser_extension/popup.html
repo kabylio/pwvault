@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWVault Autofill</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <h1>PWVault</h1>
+    <form id="login">
+      <label>Server address <input id="server" type="url" value="http://127.0.0.1:8012" required></label>
+      <label>Email <input id="email" type="email" autocomplete="username" required></label>
+      <label>Master password <input id="password" type="password" autocomplete="current-password" required></label>
+      <label id="factor-row" hidden>Authenticator or recovery code <input id="factor" autocomplete="one-time-code"></label>
+      <button class="primary">Unlock and find matching logins</button>
+    </form>
+    <p id="status" role="status"></p>
+    <section id="matches" aria-live="polite"></section>
+    <section id="session-controls" hidden>
+      <button id="lockExtension">Lock extension now</button>
+    </section>
+    <p class="hint">PWVault only offers exact website-origin matches. Choose a login to fill; it never submits the form.</p>
+  </main>
+  <script src="vendor/argon2.umd.min.js"></script>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

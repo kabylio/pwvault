@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pwvault</title><link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header><h1>🔐 pwvault</h1><select id="lang" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option></select><span id="who"></span><span id="tools" hidden>
+  <button id="btnHealth" class="ghost">Health</button><button id="btnBackup" class="ghost">Backup / import</button><button id="btnAdmin" class="ghost" hidden>Admin</button><button id="btn2fa" class="ghost">2FA</button><button id="btnPasskeys" class="ghost">Passkeys</button><button id="btnRecovery" class="ghost">Recovery key</button><button id="btnLock" class="ghost">🔒 Lock</button></span></header>
+<div id="toast" role="status"></div>
+
+<main id="auth">
+  <form id="authForm" class="card" autocomplete="off">
+    <div class="tabs"><button type="button" data-mode="login" class="on">Sign in</button>
+      <button type="button" data-mode="register">Create account</button></div>
+    <p id="notice" class="notice" hidden></p>
+    <label>Email <input id="email" type="email" required autocomplete="username" autofocus></label>
+    <label>Master password <input id="master" type="password" required autocomplete="current-password"></label>
+    <label class="check"><input type="checkbox" id="showPw"> Show password</label>
+    <div id="meter" data-score="0" hidden><i></i><small></small></div>
+    <p id="regHint" class="hint" hidden>Tip: pick 4 or more random words, or 12+ characters. You will type it often, and nobody can reset it.</p>
+    <label id="confirmRow" hidden>Confirm master password <input id="confirm" type="password" autocomplete="new-password"></label>
+    <label id="inviteRow" hidden>Invitation code (from your administrator) <input id="invite" autocomplete="off"></label>
+    <label id="ackRow" class="check" hidden><input type="checkbox" id="ack"> I understand my master password cannot be recovered</label>
+    <div id="otpRow" hidden><label>Authenticator code or recovery code <input id="otp" inputmode="text" autocomplete="one-time-code"></label><button id="usePasskey" type="button" class="ghost" hidden>Use a passkey</button></div>
+    <p id="err" class="err" role="alert"></p>
+    <button id="go" class="primary">Sign in</button>
+    <button id="recoverAccount" type="button" class="ghost">Recover account with recovery key</button><p class="hint">Your master password never leaves this device and cannot be recovered.</p>
+  </form>
+</main>
+
+<main id="vault" hidden>
+  <div class="bar"><select id="vaultSel" aria-label="Vault"></select><button id="newVault" class="ghost">New shared vault</button><button id="btnMembers" class="ghost" hidden>Members</button></div>
+  <div class="bar"><input id="search" type="search" placeholder="Search…"><button id="add" class="primary">+ Add</button></div>
+  <ul id="list"></ul>
+  <div id="empty" class="empty" hidden><p>Nothing here yet.</p><button id="emptyAdd" class="primary">Add your first password</button></div>
+  <p class="hint">Locks automatically after 5 minutes of inactivity. Copied passwords are cleared from the clipboard after 20 seconds.</p>
+</main>
+
+<dialog id="dlgEntry"><form method="dialog" id="entryForm" class="card">
+  <h2 id="entryTitle">Add entry</h2>
+  <label id="siteLabel">Site / item name <input id="fSite" required></label>
+  <label>Item type <select id="fType"><option value="login">Login</option><option value="secure_note">Secure note</option><option value="card">Payment card</option><option value="identity">Identity</option></select></label>
+  <label id="fUserRow">Username <input id="fUser"></label>
+  <label id="fPassRow">Password <span class="row"><input id="fPass" type="password" required autocomplete="off">
+    <button type="button" id="togglePw" class="ghost">Show</button><button type="button" id="gen" class="ghost">Generate</button></span></label>
+  <div id="meter2" data-score="0"><i></i><small></small></div>
+  <div id="loginOnly"><div class="row"><button type="button" id="chk" class="ghost">Check breaches</button><small id="breachRes"></small></div></div>
+  <label>Notes <textarea id="fNotes" rows="2"></textarea></label>
+  <div><b>Custom fields</b><div id="customFields"></div><button type="button" id="addCustomField" class="ghost">+ Add custom field</button></div>
+  <label>Attachments (2 MB total maximum) <input id="fFiles" type="file" multiple></label><div id="attachmentList"></div>
+  <p id="entryErr" class="err"></p>
+  <div class="row end"><button type="button" id="cancel" class="ghost">Cancel</button><button class="primary">Save</button></div>
+</form></dialog>
+
+<dialog id="dlgHistory"><div class="card">
+  <h2>Password history</h2><div id="historyBody"></div>
+  <div class="row end"><button id="closeHistory" class="ghost">Close</button></div>
+</div></dialog>
+<dialog id="dlgBackup"><div class="card">
+  <h2>Encrypted backup and import</h2>
+  <p class="hint">Backups are encrypted on this device with a separate passphrase. CSV imports are read locally and added to your personal vault.</p>
+  <label>Backup passphrase <input id="backupPass" type="password" autocomplete="new-password"></label>
+  <label>Confirm backup passphrase <input id="backupConfirm" type="password" autocomplete="new-password"></label>
+  <button id="exportBackup" class="primary">Download encrypted backup</button>
+  <label>Import an encrypted backup or CSV file <input id="importFile" type="file" accept=".json,.csv,application/json,text/csv"></label>
+  <label>Backup passphrase for import <input id="importPass" type="password" autocomplete="off"></label>
+  <button id="previewImport" class="ghost">Preview import</button>
+  <p id="backupStatus" class="hint" role="status"></p>
+  <div class="row end"><button id="applyImport" class="primary" hidden>Import entries</button><button id="closeBackup" class="ghost">Close</button></div>
+</div></dialog>
+<dialog id="dlgRecoverySetup"><div class="card">
+  <h2>Account recovery key</h2>
+  <p class="hint">This random key can replace a lost master password. Save it offline and separately from your vault. It is shown only after setup succeeds.</p>
+  <label>Confirm master password <input id="setupRecoveryPassword" type="password" autocomplete="current-password"></label><label>Authenticator/recovery code, or leave blank to confirm with a passkey <input id="setupRecoveryFactor" autocomplete="one-time-code"></label>
+  <button id="createRecovery" class="primary">Create or replace recovery key</button>
+  <code id="newRecoveryKey" hidden></code><button id="copyRecoveryKey" class="ghost" hidden>Copy recovery key</button>
+  <p id="recoverySetupStatus" class="hint" role="status"></p>
+  <div class="row end"><button id="closeRecoverySetup" class="ghost">Close</button></div>
+</div></dialog>
+<dialog id="dlgRecovery"><div class="card">
+  <h2>Recover your vault</h2>
+  <p class="hint">The recovery key re-wraps your vault key with a new master password. The server cannot decrypt your data.</p>
+  <label>Email <input id="recoveryEmail" type="email" autocomplete="username"></label>
+  <label>Recovery key <input id="recoveryKey" autocomplete="off"></label>
+  <label>New master password <input id="recoveryNew" type="password" autocomplete="new-password"></label>
+  <label>Confirm new master password <input id="recoveryConfirm" type="password" autocomplete="new-password"></label>
+  <label>Authenticator or recovery code (if 2FA is enabled) <input id="recoveryFactor" autocomplete="one-time-code"></label>
+  <button id="completeRecovery" class="primary">Recover and sign in</button>
+  <p id="recoveryStatus" class="hint" role="status"></p>
+  <div class="row end"><button id="closeRecovery" class="ghost">Close</button></div>
+</div></dialog>
+<dialog id="dlgPasskeys"><div class="card">
+  <h2>Passkeys</h2><p class="hint">A passkey adds a device controlled second factor. Your master password is still needed to decrypt the vault.</p>
+  <label>Confirm master password <input id="passkeyPassword" type="password" autocomplete="current-password"></label><label>Authenticator/recovery code, or leave blank to confirm with a passkey <input id="passkeyFactor" autocomplete="one-time-code"></label><label>Passkey name <input id="passkeyName" maxlength="80" value="My device"></label>
+  <button id="addPasskey" class="primary">Add passkey</button><div id="passkeyList"></div>
+  <p id="passkeyStatus" class="hint" role="status"></p>
+  <div class="row end"><button id="closePasskeys" class="ghost">Close</button></div>
+</div></dialog>
+<dialog id="dlg2fa"><div class="card">
+  <h2>Two-factor authentication</h2><div id="twofaBody"></div>
+  <div class="row end"><button id="close2fa" class="ghost">Close</button></div>
+</div></dialog>
+
+<dialog id="dlgHealth"><div class="card"><h2>Vault health</h2><div id="healthBody"></div>
+  <div class="row end"><button id="closeHealth" class="ghost">Close</button></div></div></dialog>
+<dialog id="dlgAdmin" class="wide"><div class="card"><h2>Administration</h2>
+  <div class="tabs"><button id="tabUsers" class="on">Users</button><button id="tabAudit">Audit log</button></div>
+  <div id="adminBody"></div><div class="row end"><button id="closeAdmin" class="ghost">Close</button></div></div></dialog>
+
+<dialog id="dlgMembers" class="wide"><div class="card"><h2 id="membersTitle">Members</h2>
+  <div id="membersBody"></div>
+  <div id="addMember" class="card" hidden><b>Share with a colleague</b>
+    <label>Email <input id="mEmail" type="email"></label>
+    <label>Role <select id="mRole"><option>viewer</option><option>editor</option><option>owner</option></select></label>
+    <label>Their key fingerprint (read to you by phone or in person; recommended) <input id="mFp" placeholder="XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX"></label>
+    <p id="mErr" class="err"></p><button id="mAdd" class="primary">Share</button></div>
+  <div class="row end"><button id="delVault" class="ghost" hidden>Delete vault</button><button id="closeMembers" class="ghost">Close</button></div></div></dialog>
+
+<script src="vendor/argon2.umd.min.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script type="module" src="app.js"></script>
+</body></html>

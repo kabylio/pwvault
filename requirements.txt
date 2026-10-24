@@ -1,0 +1,9 @@
+cryptography>=43.0
+argon2-cffi>=23.1
+fastapi>=0.110
+uvicorn[standard]>=0.29
+sqlalchemy>=2.0
+pyjwt>=2.8
+pyotp>=2.9
+httpx>=0.27
+webauthn>=2.2,<3

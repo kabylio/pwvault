@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Never commit vaults or keys
+*.db
+*.key
+*.pass
+.env
+node_modules/
+.tools/
+.pytest-run-*/
+.test-tmp-*/
